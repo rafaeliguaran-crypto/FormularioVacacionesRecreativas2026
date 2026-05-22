@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registros</title>
+</head>
+<body>
+    <h1>Inscripciones registradas</h1>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>ID</th>
+            <th>Datos</th>
+            <th>Imágenes</th>
+            <th>Tipo Doc</th>
+            <th>Número Doc</th>
+            <th>Nombre</th>
+            <th>Celular</th>
+            <th>Correo</th>
+            <th>Comunidad</th>
+            <th>Espacio</th>
+            <th>Horario</th>
+        </tr>
+
+        {% for fila in datos %}
+        <tr>
+            {% for campo in fila %}
+                <td>{{ campo }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

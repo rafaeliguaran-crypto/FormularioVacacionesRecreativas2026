@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Vacaciones Recreativas Culturales 2026</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            color: #7b2cbf;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #7b2cbf;
+            padding-bottom: 5px;
+            margin-top: 35px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .nota {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 5px solid #ffc107;
+            margin-top: 15px;
+        }
+
+        .autorizacion {
+            background: #f1f1f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        button {
+            margin-top: 30px;
+            width: 100%;
+            padding: 14px;
+            background: #7b2cbf;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #5a189a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Vacaciones Recreativas Culturales 2026 ✨</h1>
+
+        <p>
+            Arte, creatividad y diversión para disfrutar en comunidad.
+        </p>
+
+        <p>
+            ¿Eres líder de una Junta de Acción Comunal (J.A.C) o administrador de una unidad residencial?
+            ¡Esta es tu oportunidad de llenar tu sector de alegría!
+        </p>
+
+        <p>
+            Inscribe a tu comunidad y prepárate para vivir la música, el teatro, la danza,
+            las manualidades, las artes plásticas y la lectura con experiencias únicas e inolvidables
+            para niños y adultos. 🎭🥁📖
+        </p>
+
+        <div class="nota">
+            📌 Asegura el cupo para tu comunidad hoy mismo. Solo se podrá seleccionar un horario por comunidad/sector.
+            La inscripción y el desarrollo del curso no tienen ningún valor.
+        </div>
+
+        {% if horarios %}
+        <form method="POST">
+
+            <h2>Sección 1 — Autorizaciones</h2>
+
+            <div class="autorizacion">
+                <p>
+                    Autorizo a la Administración Municipal de Sabaneta para que utilice la información consignada
+                    en este formulario de inscripción para las Vacaciones Recreativas con fines estadísticos y/o académicos.
+                </p>
+
+                <label>Autorización Protección de Datos Personales:</label>
+                <select name="autorizacion_datos" required>
+    <option value="">Seleccione una opción</option>
+    <option value="Sí autorizo">Sí, autorizo</option>
+    <option value="No autorizo">No autorizo</option>
+</select>
+            </div>
+
+            <div class="autorizacion">
+                <p>
+                    Autorizo al Municipio de Sabaneta a difundir y exhibir las imágenes en las que aparezco
+                    por hacer parte de los grupos y procesos de proyección de la Casa de la Cultura La Barquereña,
+                    exclusivamente con fines institucionales.
+                </p>
+
+                <label>Autorización uso de imágenes:</label>
+                <select name="autorizacion_imagenes" required>
+    <option value="">Seleccione una opción</option>
+    <option value="Sí autorizo">Sí, autorizo</option>
+    <option value="No autorizo">No autorizo</option>
+</select>
+            </div>
+
+            <h2>Sección 2 — Datos personales</h2>
+
+            <label>Tipo de documento:</label>
+            <select name="tipo_documento" required>
+                <option value="">Seleccione una opción</option>
+                <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+            </select>
+
+            <label>Número de documento:</label>
+            <input type="text" name="numero_documento" required>
+
+            <label>Nombre completo:</label>
+            <input type="text" name="nombre_completo" required>
+
+            <label>Número de contacto celular:</label>
+            <input type="text" name="celular" required>
+
+            <label>Correo electrónico:</label>
+            <input type="email" name="correo" required>
+
+            <label>Nombre de la Unidad Residencial o Junta de Acción Comunal (J.A.C) que representa:</label>
+            <input type="text" name="comunidad" required>
+
+            <label>¿Cuenta con un espacio cerrado, amplio y adecuado para la realización de cursos artísticos, con buena iluminación, sillas y mesas?</label>
+            <select name="espacio_adecuado" required>
+                <option value="">Seleccione una opción</option>
+                <option value="Sí">Sí</option>
+                <option value="No">No</option>
+            </select>
+
+            <div class="nota">
+                Después de la inscripción nos estaremos comunicando para confirmar los materiales que debe aportar la J.A.C o unidad residencial.
+            </div>
+
+            <h2>Sección 3 — Horarios</h2>
+
+            <label>Por favor seleccione el horario:</label>
+            <select name="horario" required>
+                <option value="">Seleccione un horario disponible</option>
+                {% for horario in horarios %}
+                    <option value="{{ horario }}">{{ horario }}</option>
+                {% endfor %}
+            </select>
+
+            <div class="nota">
+                Ten en cuenta que solo se podrá seleccionar un horario por comunidad/sector.
+                *Sujeto a cambios por la Subdirección.
+            </div>
+
+            <button type="submit">Enviar inscripción</button>
+        </form>
+
+        {% else %}
+            <h2>No hay horarios disponibles</h2>
+            <p>Ya fueron seleccionados todos los horarios disponibles para las Vacaciones Recreativas Culturales 2026.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
