@@ -145,6 +145,5 @@ def registros():
     datos = leer_registros()
     return render_template("registros.html", datos=datos)
 
-crear_excel_si_no_existe()
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=5000)
