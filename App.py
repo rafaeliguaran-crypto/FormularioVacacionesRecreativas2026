@@ -49,6 +49,7 @@ def leer_registros():
         if any(fila):
             registros.append(fila)
 
+    wb.close()
     return registros
 
 def limpiar_texto(texto):
@@ -65,9 +66,10 @@ def obtener_horarios_disponibles():
     horarios_ocupados = []
 
     for fila in ws.iter_rows(min_row=2, values_only=True):
-        horario = limpiar_texto(fila[10])
-        if horario:
-            horarios_ocupados.append(horario)
+        if len(fila) > 10:
+            horario = limpiar_texto(fila[10])
+            if horario:
+                horarios_ocupados.append(horario)
 
     wb.close()
 
@@ -77,8 +79,6 @@ def obtener_horarios_disponibles():
     ]
 
     return horarios_disponibles
-
-    return [h for h in HORARIOS if h not in horarios_ocupados]
 
 def guardar_registro(datos):
     crear_excel_si_no_existe()
@@ -91,9 +91,10 @@ def guardar_registro(datos):
     horarios_ocupados = []
 
     for fila in ws.iter_rows(min_row=2, values_only=True):
-        horario = limpiar_texto(fila[10])
-        if horario:
-            horarios_ocupados.append(horario)
+        if len(fila) > 10:
+            horario = limpiar_texto(fila[10])
+            if horario:
+                horarios_ocupados.append(horario)
 
     if horario_seleccionado in horarios_ocupados:
         wb.close()
@@ -144,6 +145,8 @@ def gracias():
 def registros():
     datos = leer_registros()
     return render_template("registros.html", datos=datos)
+
+crear_excel_si_no_existe()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
