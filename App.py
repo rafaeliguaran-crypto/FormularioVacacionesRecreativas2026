@@ -146,6 +146,5 @@ def registros():
     return render_template("registros.html", datos=datos)
 
 crear_excel_si_no_existe()
-
 if __name__ == "__main__":
     app.run()
