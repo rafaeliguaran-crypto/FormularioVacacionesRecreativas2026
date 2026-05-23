@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
-import sqlite3
+from openpyxl import Workbook, load_workbook
+import os
 
 app = Flask(__name__)
+
+ARCHIVO_EXCEL = "inscripciones_vacaciones.xlsx"
 
 HORARIOS = [
     "Martes 16 de Junio entre las 9:00 a. m. y 12:00 p. m.",
@@ -14,42 +17,98 @@ HORARIOS = [
     "Viernes 19 de Junio entre las 2:00 p. m. y 5:00 p. m."
 ]
 
-def conectar_db():
-    return sqlite3.connect("vacaciones_recreativas.db")
+ENCABEZADOS = [
+    "ID",
+    "Autorización Datos",
+    "Autorización Imágenes",
+    "Tipo Documento",
+    "Número Documento",
+    "Nombre Completo",
+    "Celular",
+    "Correo",
+    "Comunidad",
+    "Espacio Adecuado",
+    "Horario"
+]
 
-def crear_tabla():
-    conn = conectar_db()
-    cursor = conn.cursor()
+def crear_excel_si_no_existe():
+    if not os.path.exists(ARCHIVO_EXCEL):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Inscripciones"
+        ws.append(ENCABEZADOS)
+        wb.save(ARCHIVO_EXCEL)
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS inscripciones (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            autorizacion_datos TEXT NOT NULL,
-            autorizacion_imagenes TEXT NOT NULL,
-            tipo_documento TEXT NOT NULL,
-            numero_documento TEXT NOT NULL,
-            nombre_completo TEXT NOT NULL,
-            celular TEXT NOT NULL,
-            correo TEXT NOT NULL,
-            comunidad TEXT NOT NULL,
-            espacio_adecuado TEXT NOT NULL,
-            horario TEXT NOT NULL UNIQUE
-        )
-    """)
+def leer_registros():
+    crear_excel_si_no_existe()
+    wb = load_workbook(ARCHIVO_EXCEL)
+    ws = wb["Inscripciones"]
 
-    conn.commit()
-    conn.close()
+    registros = []
+    for fila in ws.iter_rows(min_row=2, values_only=True):
+        if any(fila):
+            registros.append(fila)
+
+    return registros
+
+def limpiar_texto(texto):
+    if texto is None:
+        return ""
+    return str(texto).strip()
 
 def obtener_horarios_disponibles():
-    conn = conectar_db()
-    cursor = conn.cursor()
+    crear_excel_si_no_existe()
 
-    cursor.execute("SELECT horario FROM inscripciones")
-    horarios_ocupados = [fila[0] for fila in cursor.fetchall()]
+    wb = load_workbook(ARCHIVO_EXCEL)
+    ws = wb["Inscripciones"]
 
-    conn.close()
+    horarios_ocupados = []
+
+    for fila in ws.iter_rows(min_row=2, values_only=True):
+        horario = limpiar_texto(fila[10])
+        if horario:
+            horarios_ocupados.append(horario)
+
+    wb.close()
+
+    horarios_disponibles = [
+        horario for horario in HORARIOS
+        if limpiar_texto(horario) not in horarios_ocupados
+    ]
+
+    return horarios_disponibles
 
     return [h for h in HORARIOS if h not in horarios_ocupados]
+
+def guardar_registro(datos):
+    crear_excel_si_no_existe()
+
+    wb = load_workbook(ARCHIVO_EXCEL)
+    ws = wb["Inscripciones"]
+
+    horario_seleccionado = limpiar_texto(datos[-1])
+
+    horarios_ocupados = []
+
+    for fila in ws.iter_rows(min_row=2, values_only=True):
+        horario = limpiar_texto(fila[10])
+        if horario:
+            horarios_ocupados.append(horario)
+
+    if horario_seleccionado in horarios_ocupados:
+        wb.close()
+        return False
+
+    nuevo_id = ws.max_row
+
+    datos_limpios = tuple(limpiar_texto(dato) for dato in datos)
+
+    ws.append((nuevo_id,) + datos_limpios)
+
+    wb.save(ARCHIVO_EXCEL)
+    wb.close()
+
+    return True
 
 @app.route("/", methods=["GET", "POST"])
 def formulario():
@@ -67,32 +126,11 @@ def formulario():
             request.form.get("horario")
         )
 
-        try:
-            conn = conectar_db()
-            cursor = conn.cursor()
+        guardado = guardar_registro(datos)
 
-            cursor.execute("""
-                INSERT INTO inscripciones (
-                    autorizacion_datos,
-                    autorizacion_imagenes,
-                    tipo_documento,
-                    numero_documento,
-                    nombre_completo,
-                    celular,
-                    correo,
-                    comunidad,
-                    espacio_adecuado,
-                    horario
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, datos)
-
-            conn.commit()
-            conn.close()
-
+        if guardado:
             return redirect(url_for("gracias"))
-
-        except sqlite3.IntegrityError:
+        else:
             return "Ese horario ya fue seleccionado por otra persona. Por favor vuelve al formulario y escoge otro horario disponible."
 
     horarios_disponibles = obtener_horarios_disponibles()
@@ -104,16 +142,9 @@ def gracias():
 
 @app.route("/registros")
 def registros():
-    conn = conectar_db()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM inscripciones")
-    datos = cursor.fetchall()
-
-    conn.close()
-
+    datos = leer_registros()
     return render_template("registros.html", datos=datos)
 
 if __name__ == "__main__":
-    crear_tabla()
+    crear_excel_si_no_existe()
     app.run(debug=True)
